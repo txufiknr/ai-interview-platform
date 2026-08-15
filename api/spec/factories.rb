@@ -72,4 +72,12 @@ FactoryBot.define do
     culture_narrative { 'Culture narrative.' }
     overall_narrative { 'Overall narrative.' }
   end
+
+  factory :assessor_override do
+    portfolio_skill
+    ai_level { 3 }
+    override_level { 4 }
+    assessor_notes { 'Human reassessment based on evidence.' }
+    overridden_by { 1 }
+  end
 end
