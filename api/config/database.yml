@@ -20,7 +20,7 @@ development:
 
 test:
   <<: *default
-  database: rakamin_test
+  database: <%= ENV.fetch('DB_NAME', 'rakamin_test') %>
 
 staging:
   <<: *default
