@@ -33,8 +33,11 @@ Two additional issues were found and fixed in this change:
 | Cross-tenant portfolio read is denied | `tenant_isolation_spec` (request spec) |
 | Fit/gap cache invalidated by newer overrides; export/regenerate validation | `portfolios_controller_spec` (request spec) |
 | Migration reversible & safe against existing rows | reversible `change` + `counter_evidence` default `[]` |
-| Frontend suite green, typecheck + build clean | Vitest 12/12, `tsc --noEmit`, `vite build` |
-| Backend suite green | RSpec 36/36 (via Docker) |
+| Candidate outcome feedback is token-gated, tenant-safe, and never leaks raw levels/overrides | `feedback_spec` + `wow_endpoints_spec` |
+| Integrity signals persisted and surfaced to assessors | `wow_endpoints_spec` (integrity) + `TrustContextPanel` |
+| Fair comparison normalizes candidates onto one rubric, tenant-isolated | `wow_endpoints_spec` (comparison) |
+| Frontend suite green, typecheck + build clean | Vitest 17/17, `tsc --noEmit`, `vite build` |
+| Backend suite green | RSpec 53/53 (via Docker) |
 
 ## Design principles
 
@@ -80,12 +83,12 @@ the hands of the model with no human-readable audit trail. Rejected: contradicts
 # Backend (Docker harness; no native Ruby needed)
 docker compose -f docker-compose.test.yml run --rm api bundle exec rails db:prepare
 docker compose -f docker-compose.test.yml run --rm api bundle exec rspec
-# → 36 examples, 0 failures
+# → 53 examples, 0 failures
 
 # Frontend
 cd web
 npm run typecheck   # clean
-npm test            # 12 tests, 0 failures
+npm test            # 17 tests, 0 failures
 npm run build       # vite build clean (output → web/dist/, gitignored)
 ```
 
@@ -104,9 +107,30 @@ npm run build       # vite build clean (output → web/dist/, gitignored)
 
   Commit `1ffeec4` (SEEDED FAULT) → `git revert` → RSpec **green 22/22**
   (commit `fc3b98f`). Scratch branch deleted; history recorded in the report.
-  (Full suite has since grown to **36/36** with the controller request specs.)
+  (Full suite has since grown to **53/53** with controller + wow request specs.)
 - **AI verification moment:** documented in the external report — an AI-generated snippet
   was corrected after verification (see report §AI verification).
+
+## Beyond the flagship — candidate & assessor "wow" features
+
+All five Tier-1 ideas are shipped as part of this PR (see `PROJECT-ROADMAP.md` §Beyond Expectations):
+
+- **W1 Candidate Outcome Feedback** — `/feedback/:token` (public, token-gated, tenant-safe).
+  `Evaluations::Feedback` composes a warm, non-scoring summary (strengths, growth areas,
+  coverage). Deliberately never exposes raw 1–5 levels, confidence, or assessor overrides.
+  Backed by `feedback_spec` (privacy assertions) + `wow_endpoints_spec`.
+- **W2 Session Trust & Context** — `sessions.integrity_metadata` (JSONB, reversible migration)
+  captured best-effort from the candidate browser (device state, connection health, reconnect
+  events via `POST /sessions/:token/integrity`). Shown to assessors as a transparent
+  `TrustContextPanel` on the portfolio page.
+- **W4 Fair Comparison** — `GET /assessments/:id/comparison` normalizes completed candidates
+  onto one rubric (coverage, avg level, status, overrides) and ranks them. Tenant-isolated via
+  the scoped assessment lookup; `ComparisonPage` renders the table.
+- **W5 Interview Prep Hub** — calm pre-interview panel (what to expect, skill areas from
+  `candidate_info`, non-scored practice questions) that lowers candidate anxiety before the live
+  interview.
+- **#13 Monozukuri polish** — reusable `EmptyState` component with instructive copy applied to
+  assessments, vacancies, and transcript pages; consistent loading/error/empty states throughout.
 
 ## CI
 
