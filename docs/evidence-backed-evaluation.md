@@ -31,9 +31,10 @@ Two additional issues were found and fixed in this change:
 | AI timeout / malformed output → structured failure, no silent zero | `InterviewEvaluatorService` spec |
 | PII redacted before reaching the model | `Ai::PiiScrubber` spec |
 | Cross-tenant portfolio read is denied | `tenant_isolation_spec` (request spec) |
+| Fit/gap cache invalidated by newer overrides; export/regenerate validation | `portfolios_controller_spec` (request spec) |
 | Migration reversible & safe against existing rows | reversible `change` + `counter_evidence` default `[]` |
 | Frontend suite green, typecheck + build clean | Vitest 12/12, `tsc --noEmit`, `vite build` |
-| Backend suite green | RSpec 22/22 (via Docker) |
+| Backend suite green | RSpec 36/36 (via Docker) |
 
 ## Design principles
 
@@ -79,7 +80,7 @@ the hands of the model with no human-readable audit trail. Rejected: contradicts
 # Backend (Docker harness; no native Ruby needed)
 docker compose -f docker-compose.test.yml run --rm api bundle exec rails db:prepare
 docker compose -f docker-compose.test.yml run --rm api bundle exec rspec
-# → 22 examples, 0 failures
+# → 36 examples, 0 failures
 
 # Frontend
 cd web
@@ -103,6 +104,7 @@ npm run build       # vite build clean (output → web/dist/, gitignored)
 
   Commit `1ffeec4` (SEEDED FAULT) → `git revert` → RSpec **green 22/22**
   (commit `fc3b98f`). Scratch branch deleted; history recorded in the report.
+  (Full suite has since grown to **36/36** with the controller request specs.)
 - **AI verification moment:** documented in the external report — an AI-generated snippet
   was corrected after verification (see report §AI verification).
 
