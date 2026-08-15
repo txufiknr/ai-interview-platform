@@ -88,8 +88,21 @@ npm test            # 12 tests, 0 failures
 npm run build       # vite build clean (output → web/dist/, gitignored)
 ```
 
-- **Seeded fault test:** break the logic on a scratch branch and watch the relevant test
-  fail, then revert. See the PR description / external report for the recorded proof.
+- **Seeded fault test (recorded):** on scratch branch `proof-seeded-fault` the
+  low-confidence guard in `Summary#status_for` was dropped (`partial` → always
+  `assessed`). RSpec went **red** — `2 failures`:
+
+  ```text
+  1) Evaluations::Summary#call when evidence is present but confidence is low
+     marks the skill partial and requests human review
+     expected: "needs_review"
+          got: "ready_for_review"
+  2) Evaluations::Summary#status_for maps assessed / partial / not_assessed
+     expected: "partial"  got: "assessed"
+  ```
+
+  Commit `1ffeec4` (SEEDED FAULT) → `git revert` → RSpec **green 22/22**
+  (commit `fc3b98f`). Scratch branch deleted; history recorded in the report.
 - **AI verification moment:** documented in the external report — an AI-generated snippet
   was corrected after verification (see report §AI verification).
 
