@@ -9,8 +9,10 @@ import { sessionsApi } from "@/services/sessions";
 import { vacanciesApi } from "@/services/vacancies";
 import { portfoliosApi } from "@/services/portfolios";
 import { usePolling } from "@/hooks/usePolling";
+import EvaluationSummaryPanel from "@/components/portfolio/EvaluationSummaryPanel";
+import BlindModeToggle from "@/components/portfolio/BlindModeToggle";
 import { ArrowLeft, Download, Loader2, RefreshCw, Zap, FileText } from "lucide-react";
-import type { Portfolio, AssessorOverride, Vacancy } from "@/types";
+import type { Portfolio, AssessorOverride, Vacancy, EvaluationSkillSummary } from "@/types";
 
 export default function PortfolioPage() {
   const { id, sessionId } = useParams<{ id: string; sessionId: string }>();
@@ -23,6 +25,15 @@ export default function PortfolioPage() {
   const [selectedVacancy, setSelectedVacancy] = useState<string>("");
   const [exporting, setExporting] = useState<"pdf" | "json" | null>(null);
   const [candidateName, setCandidateName] = useState<string | null>(null);
+  const [blind, setBlind] = useState(false);
+
+  // Map skill id -> evaluation summary (status, counter-evidence) for badges.
+  const evaluationBySkill = new Map<number, EvaluationSkillSummary>();
+  if (portfolio?.evaluation?.skills) {
+    portfolio.evaluation.skills.forEach((s) => evaluationBySkill.set(s.id, s));
+  }
+
+  const displayName = blind ? "Candidate (anonymized)" : candidateName;
 
   const fetchPortfolio = useCallback(async () => {
     const res = await sessionsApi.getPortfolio(Number(sessionId));
@@ -114,13 +125,16 @@ export default function PortfolioPage() {
           </Link>
           <div>
             <h1 className="text-lg font-semibold">Portfolio Results</h1>
-            {candidateName && (
-              <p className="text-sm text-muted-foreground">{candidateName}</p>
+            {displayName && (
+              <p className="text-sm text-muted-foreground" data-testid="candidate-name">
+                {displayName}
+              </p>
             )}
           </div>
         </div>
 
         <div className="flex gap-2">
+          <BlindModeToggle blind={blind} onToggle={setBlind} />
           <Link
             to={`/assessments/${id}/sessions/${sessionId}/transcript`}
             className="inline-flex items-center gap-1 text-sm border rounded-md px-3 py-1.5 hover:bg-accent transition-colors"
@@ -186,6 +200,9 @@ export default function PortfolioPage() {
       {/* Ready state */}
       {!generating && portfolio?.generation_status === "complete" && (
         <>
+          {/* Evaluation integrity summary */}
+          <EvaluationSummaryPanel summary={portfolio.evaluation} />
+
           {/* Configured skills */}
           <div className="space-y-3">
             <h2 className="text-sm font-semibold">Configured Skills</h2>
@@ -196,6 +213,7 @@ export default function PortfolioPage() {
                   key={skill.id}
                   skill={skill}
                   override={overrides[skill.id]}
+                  evaluationSkill={evaluationBySkill.get(skill.id)}
                   onOverrideSaved={(o) => handleOverrideSaved(skill.id, o)}
                 />
               ))}
@@ -222,6 +240,7 @@ export default function PortfolioPage() {
                       key={skill.id}
                       skill={skill}
                       override={overrides[skill.id]}
+                      evaluationSkill={evaluationBySkill.get(skill.id)}
                       onOverrideSaved={(o) => handleOverrideSaved(skill.id, o)}
                     />
                   ))}
