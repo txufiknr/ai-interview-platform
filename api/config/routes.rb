@@ -18,6 +18,9 @@ Rails.application.routes.draw do
 
       # Assessments
       resources :assessments do
+        member do
+          get :comparison
+        end
         resources :sessions, only: %i[index create]
       end
 
@@ -34,7 +37,9 @@ Rails.application.routes.draw do
 
       # Candidate-facing (no JWT — invite token only)
       get  'sessions/:token/candidate',      to: 'sessions#candidate_info'
+      get  'sessions/:token/feedback',       to: 'sessions#feedback'
       post 'sessions/:token/audio_complete', to: 'sessions#audio_complete'
+      post 'sessions/:token/integrity',      to: 'sessions#integrity'
 
       # Portfolio skills overrides
       resources :portfolio_skills, only: [] do
