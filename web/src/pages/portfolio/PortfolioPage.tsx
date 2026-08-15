@@ -11,8 +11,9 @@ import { portfoliosApi } from "@/services/portfolios";
 import { usePolling } from "@/hooks/usePolling";
 import EvaluationSummaryPanel from "@/components/portfolio/EvaluationSummaryPanel";
 import BlindModeToggle from "@/components/portfolio/BlindModeToggle";
-import { ArrowLeft, Download, Loader2, RefreshCw, Zap, FileText } from "lucide-react";
-import type { Portfolio, AssessorOverride, Vacancy, EvaluationSkillSummary } from "@/types";
+import TrustContextPanel from "@/components/portfolio/TrustContextPanel";
+import { ArrowLeft, Download, Loader2, RefreshCw, Zap, FileText, Scale } from "lucide-react";
+import type { Portfolio, AssessorOverride, Vacancy, EvaluationSkillSummary, IntegrityMetadata } from "@/types";
 
 export default function PortfolioPage() {
   const { id, sessionId } = useParams<{ id: string; sessionId: string }>();
@@ -26,6 +27,9 @@ export default function PortfolioPage() {
   const [exporting, setExporting] = useState<"pdf" | "json" | null>(null);
   const [candidateName, setCandidateName] = useState<string | null>(null);
   const [blind, setBlind] = useState(false);
+  const [integrity, setIntegrity] = useState<IntegrityMetadata | undefined>(undefined);
+  const [sessionDuration, setSessionDuration] = useState<number | undefined>(undefined);
+  const [sessionEndReason, setSessionEndReason] = useState<string | undefined>(undefined);
 
   // Map skill id -> evaluation summary (status, counter-evidence) for badges.
   const evaluationBySkill = new Map<number, EvaluationSkillSummary>();
@@ -57,6 +61,9 @@ export default function PortfolioPage() {
       .then(([, vRes, sRes]) => {
         setVacancies(vRes.data.vacancies);
         setCandidateName(sRes.data.session.candidate_name ?? null);
+        setIntegrity(sRes.data.session.integrity_metadata);
+        setSessionDuration(sRes.data.session.duration_seconds);
+        setSessionEndReason(sRes.data.session.end_reason);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -136,6 +143,13 @@ export default function PortfolioPage() {
         <div className="flex gap-2">
           <BlindModeToggle blind={blind} onToggle={setBlind} />
           <Link
+            to={`/assessments/${id}/comparison`}
+            className="inline-flex items-center gap-1 text-sm border rounded-md px-3 py-1.5 hover:bg-accent transition-colors"
+          >
+            <Scale className="h-3.5 w-3.5" />
+            Compare
+          </Link>
+          <Link
             to={`/assessments/${id}/sessions/${sessionId}/transcript`}
             className="inline-flex items-center gap-1 text-sm border rounded-md px-3 py-1.5 hover:bg-accent transition-colors"
           >
@@ -202,6 +216,13 @@ export default function PortfolioPage() {
         <>
           {/* Evaluation integrity summary */}
           <EvaluationSummaryPanel summary={portfolio.evaluation} />
+
+          {/* Session trust & context */}
+          <TrustContextPanel
+            integrity={integrity}
+            durationSeconds={sessionDuration}
+            endReason={sessionEndReason}
+          />
 
           {/* Configured skills */}
           <div className="space-y-3">

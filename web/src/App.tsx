@@ -15,6 +15,8 @@ import VacancyListPage from "@/pages/vacancies/VacancyListPage";
 import VacancyNewPage from "@/pages/vacancies/VacancyNewPage";
 import VacancyEditPage from "@/pages/vacancies/VacancyEditPage";
 import InterviewPage from "@/pages/interview/InterviewPage";
+import FeedbackPage from "@/pages/feedback/FeedbackPage";
+import ComparisonPage from "@/pages/comparison/ComparisonPage";
 
 export default function App() {
   return (
@@ -46,15 +48,17 @@ export default function App() {
           path="/assessments/:id/sessions/:sessionId/fitgap/:vacancyId"
           element={<FitGapReportPage />}
         />
+        <Route path="/assessments/:id/comparison" element={<ComparisonPage />} />
         <Route path="/vacancies" element={<VacancyListPage />} />
         <Route path="/vacancies/new" element={<VacancyNewPage />} />
         <Route path="/vacancies/:id/edit" element={<VacancyEditPage />} />
       </Route>
       </Route>
 
-      {/* Candidate route (public) */}
+      {/* Candidate routes (public) */}
       <Route element={<CandidateLayout />}>
         <Route path="/interview/:token" element={<InterviewPage />} />
+        <Route path="/feedback/:token" element={<FeedbackPage />} />
       </Route>
     </Routes>
   );

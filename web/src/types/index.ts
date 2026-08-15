@@ -44,6 +44,7 @@ export interface Session {
   started_at?: string;
   ended_at?: string;
   duration_seconds?: number;
+  integrity_metadata?: IntegrityMetadata;
   created_at?: string;
 }
 
@@ -185,6 +186,40 @@ export interface CandidateInfo {
   role_title: string;
   time_limit_min: number;
   session_status: string;
+  skill_areas: string[];
+}
+
+export interface CandidateFeedback {
+  role_title: string;
+  overall: string;
+  strengths: string[];
+  growth_areas: string[];
+  coverage: { assessed: number; total: number; percent: number };
+}
+
+export interface IntegrityMetadata {
+  device_state?: string;
+  connection_health?: string;
+  reconnect_events?: number;
+  audio_quality?: string;
+}
+
+export interface ComparisonCandidate {
+  candidate_id?: number;
+  candidate_name?: string;
+  session_id: number;
+  coverage: { assessed: number; total: number; percent: number };
+  overall_status: string;
+  avg_level: number;
+  assessed_skills: number;
+  total_skills: number;
+  overridden_count: number;
+  generated_at?: string;
+}
+
+export interface AssessmentComparison {
+  assessment: { id: number; name: string };
+  candidates: ComparisonCandidate[];
 }
 
 export interface PaginationMeta {
