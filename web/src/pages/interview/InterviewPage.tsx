@@ -21,6 +21,7 @@ import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { useAudioWebSocket } from "@/hooks/useAudioWebSocket";
 import { sessionsApi } from "@/services/sessions";
 import HardwareCheck from "@/components/HardwareCheck";
+import ConsentBanner from "@/components/interview/ConsentBanner";
 import { CheckCircle, Mic, MicOff } from "lucide-react";
 import type { CandidateInfo, InterviewState, InterviewSpeaker, TranscriptTurn } from "@/types";
 
@@ -202,6 +203,7 @@ export default function InterviewPage() {
 
         {!hardwareCheckDone ? (
           <div className="space-y-4">
+            <ConsentBanner />
             <div className="bg-muted/50 rounded-lg p-4 text-sm space-y-1.5 text-muted-foreground">
               <p>• This is a voice interview. Make sure you're in a quiet place.</p>
               <p>• The AI will ask follow-up questions — there are no scripts.</p>
