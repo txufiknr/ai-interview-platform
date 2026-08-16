@@ -36,7 +36,7 @@ Two additional issues were found and fixed in this change:
 | Candidate outcome feedback is token-gated, tenant-safe, and never leaks raw levels/overrides | `feedback_spec` + `wow_endpoints_spec` |
 | Integrity signals persisted and surfaced to assessors | `wow_endpoints_spec` (integrity) + `TrustContextPanel` |
 | Fair comparison normalizes candidates onto one rubric, tenant-isolated | `wow_endpoints_spec` (comparison) |
-| Frontend suite green, typecheck + build clean | Vitest 17/17, `tsc --noEmit`, `vite build` |
+| Frontend suite green, typecheck + build clean | Vitest 19/19, `tsc --noEmit`, `vite build` |
 | Backend suite green | RSpec 53/53 (via Docker) |
 
 ## Design principles
