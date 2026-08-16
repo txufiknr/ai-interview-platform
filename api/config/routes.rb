@@ -3,6 +3,17 @@
 Rails.application.routes.draw do
   get '/health', to: proc { [200, {}, [{ status: 'ok' }.to_json]] }
 
+  # Web redirect fallback for candidate links opened on the API port
+  get '/interview/:token', to: redirect { |params, _req|
+    frontend = ENV.fetch('FRONTEND_URL', ENV.fetch('WEB_BASE_URL', 'http://localhost:5173'))
+    "#{frontend}/interview/#{params[:token]}"
+  }
+
+  get '/feedback/:token', to: redirect { |params, _req|
+    frontend = ENV.fetch('FRONTEND_URL', ENV.fetch('WEB_BASE_URL', 'http://localhost:5173'))
+    "#{frontend}/feedback/#{params[:token]}"
+  }
+
   namespace :api do
     namespace :v1 do
       # Auth
