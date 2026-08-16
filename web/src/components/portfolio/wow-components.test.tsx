@@ -91,3 +91,13 @@ describe("NotFoundPage & ErrorBoundary", () => {
     spy.mockRestore();
   });
 });
+
+describe("HardwareCheck", () => {
+  it("renders checklist rows without crashing", async () => {
+    const HardwareCheck = (await import("@/components/HardwareCheck")).default;
+    render(<HardwareCheck />);
+    expect(screen.getByText("OS & browser")).toBeInTheDocument();
+    expect(screen.getByText("Internet")).toBeInTheDocument();
+    expect(screen.getByText("Microphone")).toBeInTheDocument();
+  });
+});
