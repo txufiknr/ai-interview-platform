@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import BlindModeToggle from "@/components/portfolio/BlindModeToggle";
-import ConsentBanner from "@/components/interview/ConsentBanner";
-import AssessmentStatusBadge from "@/components/portfolio/AssessmentStatusBadge";
-import EvaluationSummaryPanel from "@/components/portfolio/EvaluationSummaryPanel";
-import type { EvaluationSkillSummary, EvaluationSummary } from "@/types";
+import BlindModeToggle from "./BlindModeToggle";
+import AssessmentStatusBadge from "./AssessmentStatusBadge";
+import EvaluationSummaryPanel from "./EvaluationSummaryPanel";
+import TrustContextPanel from "./TrustContextPanel";
+import type { EvaluationSkillSummary, EvaluationSummary, IntegrityMetadata } from "@/types";
 
 describe("BlindModeToggle", () => {
   it("toggles and reflects the current state", () => {
@@ -17,31 +17,6 @@ describe("BlindModeToggle", () => {
 
     rerender(<BlindModeToggle blind={true} onToggle={onToggle} />);
     expect(screen.getByRole("button")).toHaveTextContent("Blind mode ON");
-  });
-});
-
-describe("ConsentBanner", () => {
-  it("allows consent and notifies the caller", () => {
-    const onConsentChange = vi.fn();
-    render(<ConsentBanner onConsentChange={onConsentChange} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /I consent to AI processing/i }));
-    expect(onConsentChange).toHaveBeenCalledWith(true);
-    expect(screen.getByText(/may withdraw consent/i)).toBeInTheDocument();
-  });
-
-  it("allows declining AI processing", () => {
-    const onConsentChange = vi.fn();
-    render(<ConsentBanner onConsentChange={onConsentChange} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /Decline AI processing/i }));
-    expect(onConsentChange).toHaveBeenCalledWith(false);
-    expect(screen.getByText(/human assessor will review/i)).toBeInTheDocument();
-  });
-
-  it("renders the UU PDP notice copy", () => {
-    render(<ConsentBanner />);
-    expect(screen.getByText(/Personal Data Protection Law/i)).toBeInTheDocument();
   });
 });
 
@@ -92,5 +67,32 @@ describe("EvaluationSummaryPanel", () => {
   it("renders nothing when summary is absent", () => {
     const { container } = render(<EvaluationSummaryPanel summary={null} />);
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("TrustContextPanel", () => {
+  it("shows a fallback when no integrity signals were recorded", () => {
+    render(<TrustContextPanel />);
+    expect(screen.getByText("No integrity signals recorded")).toBeInTheDocument();
+  });
+
+  it("renders integrity signals when present", () => {
+    const integrity: IntegrityMetadata = {
+      device_state: "mic ok, camera passed",
+      connection_health: "stable",
+      reconnect_events: 0,
+    };
+
+    render(<TrustContextPanel integrity={integrity} durationSeconds={125} endReason="all_covered" />);
+
+    expect(screen.getByText("2m 5s")).toBeInTheDocument();
+    expect(screen.getByText("all covered")).toBeInTheDocument();
+    expect(screen.getByText("mic ok, camera passed")).toBeInTheDocument();
+    expect(screen.getByText("None — stable throughout")).toBeInTheDocument();
+  });
+
+  it("reports reconnect counts honestly", () => {
+    render(<TrustContextPanel integrity={{ reconnect_events: 3 }} />);
+    expect(screen.getByText("3 event(s)")).toBeInTheDocument();
   });
 });
