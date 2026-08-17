@@ -37,7 +37,8 @@ Two additional issues were found and fixed in this change:
 | Integrity signals persisted and surfaced to assessors | `wow_endpoints_spec` (integrity) + `TrustContextPanel` |
 | Fair comparison normalizes candidates onto one rubric, tenant-isolated | `wow_endpoints_spec` (comparison) |
 | Candidate consent confirmation modal gates interview start | `web` Vitest (`ConsentModal`) |
-| Frontend suite green, typecheck + build clean | Vitest 24/24, `tsc --noEmit`, `vite build` |
+| Fit/Gap comparison breakdown table renders seamlessly with Sidekiq background execution | `web` Vitest (`ComparisonTable`) + Docker Sidekiq worker |
+| Frontend suite green, typecheck + build clean | Vitest 27/27, `tsc --noEmit`, `vite build` |
 | Backend suite green | RSpec 53/53 (via Docker) |
 
 ## Design principles
