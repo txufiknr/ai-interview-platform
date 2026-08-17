@@ -35,8 +35,13 @@ export default function FitGapReportPage() {
     } catch (e: any) {
       if (e?.response?.status === 404) {
         try {
-          await portfoliosApi.triggerFitGap(portfolio.id, Number(vacancyId));
-          setGenerating(true);
+          const triggerRes = await portfoliosApi.triggerFitGap(portfolio.id, Number(vacancyId));
+          if ("report" in triggerRes.data && triggerRes.data.report) {
+            setReport(triggerRes.data.report);
+            setGenerating(false);
+          } else {
+            setGenerating(true);
+          }
         } catch {
           setGenerating(false);
         }
