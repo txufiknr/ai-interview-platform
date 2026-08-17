@@ -36,7 +36,8 @@ Two additional issues were found and fixed in this change:
 | Candidate outcome feedback is token-gated, tenant-safe, and never leaks raw levels/overrides | `feedback_spec` + `wow_endpoints_spec` |
 | Integrity signals persisted and surfaced to assessors | `wow_endpoints_spec` (integrity) + `TrustContextPanel` |
 | Fair comparison normalizes candidates onto one rubric, tenant-isolated | `wow_endpoints_spec` (comparison) |
-| Frontend suite green, typecheck + build clean | Vitest 20/20, `tsc --noEmit`, `vite build` |
+| Candidate consent confirmation modal gates interview start | `web` Vitest (`ConsentModal`) |
+| Frontend suite green, typecheck + build clean | Vitest 24/24, `tsc --noEmit`, `vite build` |
 | Backend suite green | RSpec 53/53 (via Docker) |
 
 ## Design principles
@@ -49,7 +50,9 @@ Two additional issues were found and fixed in this change:
 - **Tenant isolation.** Every portfolio read resolves through the tenant-scoped session
   (`sessions.tenant_id`), including `export`, `fitgap`, and `regenerate_fitgap`.
 - **UU PDP as a design constraint.** PII is scrubbed at the AI boundary, blind mode
-  anonymizes the candidate for the assessor, and the candidate sees a consent banner.
+  anonymizes the candidate for the assessor, and clicking "Start Interview" triggers an
+  explicit confirmation dialog (**Consent Modal**) informing candidates of voice processing
+  and their statutory data rights before capturing media.
 
 ## Trade-offs considered (Option A vs B)
 
@@ -88,7 +91,7 @@ docker compose -f docker-compose.test.yml run --rm api bundle exec rspec
 # Frontend
 cd web
 npm run typecheck   # clean
-npm test            # 17 tests, 0 failures
+npm test            # 24 tests, 0 failures
 npm run build       # vite build clean (output → web/dist/, gitignored)
 ```
 

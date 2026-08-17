@@ -21,7 +21,7 @@ import { useAudioPlayback } from "@/hooks/useAudioPlayback";
 import { useAudioWebSocket } from "@/hooks/useAudioWebSocket";
 import { sessionsApi } from "@/services/sessions";
 import HardwareCheck from "@/components/HardwareCheck";
-import ConsentBanner from "@/components/interview/ConsentBanner";
+import ConsentModal from "@/components/interview/ConsentModal";
 import PrepHub from "@/components/interview/PrepHub";
 import { CheckCircle, Mic, MicOff } from "lucide-react";
 import type { CandidateInfo, InterviewState, InterviewSpeaker, TranscriptTurn } from "@/types";
@@ -34,6 +34,7 @@ export default function InterviewPage() {
   const [speaker, setSpeaker] = useState<InterviewSpeaker>(null);
   const [transcript, setTranscript] = useState<Pick<TranscriptTurn, "speaker" | "text">[]>([]);
   const [hardwareCheckDone, setHardwareCheckDone] = useState(false); // kept for green banner
+  const [isConsentModalOpen, setIsConsentModalOpen] = useState(false);
   const [connectionLostLong, setConnectionLostLong] = useState(false);
   const [reconnectedPrompt, setReconnectedPrompt] = useState(false);
   const reconnectedPromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -224,13 +225,12 @@ export default function InterviewPage() {
 
         {!hardwareCheckDone ? (
           <div className="space-y-4">
-            <ConsentBanner />
             <PrepHub
               roleTitle={candidateInfo?.role_title ?? "AI Interview"}
               timeLimitMin={candidateInfo?.time_limit_min ?? 30}
               skillAreas={candidateInfo?.skill_areas ?? []}
             />
-            <HardwareCheck onStart={() => { setHardwareCheckDone(true); startInterview(); }} />
+            <HardwareCheck onStart={() => setIsConsentModalOpen(true)} />
           </div>
         ) : (
           <div className="space-y-4">
@@ -238,12 +238,21 @@ export default function InterviewPage() {
               <CheckCircle className="h-4 w-4 shrink-0" />
               <span>Hardware checks passed. You're ready to start.</span>
             </div>
-            <Button className="w-full" size="lg" onClick={startInterview}>
+            <Button className="w-full" size="lg" onClick={() => setIsConsentModalOpen(true)}>
               <Mic className="h-4 w-4 mr-2" />
               Start Interview
             </Button>
           </div>
         )}
+
+        <ConsentModal
+          open={isConsentModalOpen}
+          onOpenChange={setIsConsentModalOpen}
+          onConfirmConsent={() => {
+            setHardwareCheckDone(true);
+            startInterview();
+          }}
+        />
       </div>
     );
   }
